@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Solar Cell Defect Detection</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      background-color: #f4f6f9;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .container-custom {
+      max-width: 800px;
+      margin: 60px auto;
+    }
+
+    .card-custom {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e0e0e0;
+    }
+
+    .title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #0d6efd;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .form-label {
+      font-weight: 600;
+    }
+
+    .preview-img {
+      width: 100%;
+      max-height: 350px;
+      object-fit: contain;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-top: 30px;
+      color: #444;
+    }
+
+    .btn-primary {
+      font-weight: 600;
+      padding: 12px;
+      font-size: 1rem;
+    }
+
+    .img-fluid {
+      max-height: 350px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container-custom">
+  <div class="card card-custom">
+    <h2 class="title">Solar Cell Defect Detection</h2>
+
+    <!-- Upload Form -->
+    <form action="{{ url_for('upload_file') }}" method="POST" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label for="fileInput" class="form-label">Upload Thermal Image</label>
+        <input class="form-control" type="file" id="fileInput" name="file" required onchange="previewImage(event)">
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Upload & Predict</button>
+    </form>
+
+    {% if filename %}
+    <!-- Uploaded Image -->
+    <div class="section-title">Uploaded Image</div>
+    <img src="{{ url_for('static', filename='uploads/' + filename) }}" class="preview-img" alt="Uploaded Image">
+
+    <!-- Prediction Result -->
+    <div class="mt-4">
+      <div class="section-title">Prediction Result</div>
+      <div class="alert alert-primary d-flex align-items-center" role="alert" style="font-size: 1.1rem;">
+        <svg xmlns="http://www.w3.org/2000/svg" class="me-2" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.93 6.588l-2.29 2.29-.708-.708L8.223 5.88a.5.5 0 0 1 .707 0l.707.707a.5.5 0 0 1-.707 0zm.047 4.18a1 1 0 1 0-1.96 0 1 1 0 0 0 1.96 0z"/>
+        </svg>
+        <div>
+          <strong>{{ predicted_class }}</strong> detected in the uploaded image.
+        </div>
+      </div>
+    </div>
+
+    <!-- Probability Plot -->
+    <div class="mt-4">
+      <div class="section-title">Prediction Probability Chart</div>
+      <div class="card p-3 border-0 shadow-sm">
+        <img src="{{ url_for('static', filename=plot_path) }}" class="img-fluid rounded" alt="Prediction Probability Chart">
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  function previewImage(event) {
+    const reader = new FileReader();
+    reader.onload = function () {
+      const img = document.querySelector(".preview-img");
+      if (img) img.src = reader.result;
+    };
+    reader.readAsDataURL(event.target.files[0]);
+  }
+</script>
+
+</body>
+</html>

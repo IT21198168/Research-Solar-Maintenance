@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inverter Fault Slideshow</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: #f4f7fa;
+      font-family: "Segoe UI", sans-serif;
+    }
+    .section-card {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+      padding: 30px;
+      margin-bottom: 30px;
+    }
+    .graph-image {
+      max-height: 500px;
+      width: 100%;
+      object-fit: contain;
+      border: 1px solid #ddd;
+      padding: 10px;
+      background: #fff;
+      border-radius: 10px;
+    }
+    .graph-label {
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .slideshow-controls button {
+      min-width: 120px;
+    }
+  </style>
+</head>
+<body class="container py-4">
+
+  <h2 class="text-center text-primary mb-4"> Inverter Fault Detection </h2>
+
+  <!-- Filter Form -->
+  <form method="POST" class="section-card">
+    <h5 class="mb-3"> Filter Fault Graphs</h5>
+    <div class="row g-3">
+      <div class="col-md-5">
+        <label class="form-label">Select Inverter</label>
+        <select name="inverter" class="form-select">
+          <option value="">All Inverters</option>
+          {% for inverter in inverters %}
+            <option value="{{ inverter }}" {% if inverter == selected_inverter %}selected{% endif %}>
+              {% set idmap = {
+                '1BY6WEcLGh8j5v7': 'Inverter A', '1IF53ai7Xc0U56Y': 'Inverter B',
+                '3PZuoBAID5Wc2HD': 'Inverter C', '7JYdWkrLSPkdwr4': 'Inverter D',
+                'McdE0feGgRqW7Ca': 'Inverter E', 'VHMLBKoKgIrUVDU': 'Inverter F',
+                'WRmjgnKYAwPKWDb': 'Inverter G', 'YxYtjZvoooNbGkE': 'Inverter H',
+                'ZnxXDlPa8U1GXgE': 'Inverter I', 'ZoEaEvLYb1n2sOq': 'Inverter J',
+                'adLQvlD726eNBSB': 'Inverter K', 'bvBOhCH3iADSZry': 'Inverter L',
+                'iCRJl6heRkivqQ3': 'Inverter M', 'ih0vzX44oOqAx2f': 'Inverter N',
+                'pkci93gMrogZuBj': 'Inverter O', 'rGa61gmuvPhdLxV': 'Inverter P',
+                'sjndEbLyjtCKgGv': 'Inverter Q', 'uHbuxQJl8lW7ozc': 'Inverter R',
+                'wCURE6d3bPkepu2': 'Inverter S', 'z9Y9gH1T5YWrNuG': 'Inverter T',
+                'zBIq5rxdHJRwDNY': 'Inverter U', 'zVJPv84UY57bAof': 'Inverter V'
+              } %}
+              {{ idmap[inverter] if inverter in idmap else inverter }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-5">
+        <label class="form-label">Select Date</label>
+        <select name="date" class="form-select">
+          <option value="">All Dates</option>
+          {% for date in dates %}
+            <option value="{{ date }}" {% if date == selected_date %}selected{% endif %}>{{ date }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">🔍 Filter</button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Slideshow Graph Area -->
+  <div class="section-card text-center">
+    {% if graphs %}
+      {% set idmap = {
+        '1BY6WEcLGh8j5v7': 'Inverter A', '1IF53ai7Xc0U56Y': 'Inverter B',
+        '3PZuoBAID5Wc2HD': 'Inverter C', '7JYdWkrLSPkdwr4': 'Inverter D',
+        'McdE0feGgRqW7Ca': 'Inverter E', 'VHMLBKoKgIrUVDU': 'Inverter F',
+        'WRmjgnKYAwPKWDb': 'Inverter G', 'YxYtjZvoooNbGkE': 'Inverter H',
+        'ZnxXDlPa8U1GXgE': 'Inverter I', 'ZoEaEvLYb1n2sOq': 'Inverter J',
+        'adLQvlD726eNBSB': 'Inverter K', 'bvBOhCH3iADSZry': 'Inverter L',
+        'iCRJl6heRkivqQ3': 'Inverter M', 'ih0vzX44oOqAx2f': 'Inverter N',
+        'pkci93gMrogZuBj': 'Inverter O', 'rGa61gmuvPhdLxV': 'Inverter P',
+        'sjndEbLyjtCKgGv': 'Inverter Q', 'uHbuxQJl8lW7ozc': 'Inverter R',
+        'wCURE6d3bPkepu2': 'Inverter S', 'z9Y9gH1T5YWrNuG': 'Inverter T',
+        'zBIq5rxdHJRwDNY': 'Inverter U', 'zVJPv84UY57bAof': 'Inverter V'
+      } %}
+      <div id="slideshow-container">
+        {% for graph in graphs %}
+          <div class="slide d-none">
+            <div class="graph-label">
+              {{ idmap[graph.inverter] if graph.inverter in idmap else graph.inverter }} | {{ graph.date }}
+            </div>
+            <img src="{{ url_for('static', filename='inverter_fault_graphs/' + graph.file) }}" 
+                 class="graph-image" alt="Graph {{ loop.index }}">
+          </div>
+        {% endfor %}
+      </div>
+      <div class="mt-4 slideshow-controls d-flex justify-content-center gap-3">
+        <button class="btn btn-outline-primary" onclick="prevSlide()">⏮️ Previous</button>
+        <button class="btn btn-outline-success" onclick="startSlideshow()">▶️ Auto Play</button>
+        <button class="btn btn-outline-danger" onclick="stopSlideshow()">⏹️ Stop</button>
+        <button class="btn btn-outline-primary" onclick="nextSlide()">⏭️ Next</button>
+      </div>
+    {% else %}
+      <div class="alert alert-warning">⚠️ No graphs found for the selected filters.</div>
+    {% endif %}
+  </div>
+
+  <script>
+    let slides = document.querySelectorAll(".slide");
+    let current = 0;
+    let interval = null;
+
+    function showSlide(index) {
+      slides.forEach((slide, i) => {
+        slide.classList.add("d-none");
+        if (i === index) {
+          slide.classList.remove("d-none");
+        }
+      });
+    }
+
+    function nextSlide() {
+      current = (current + 1) % slides.length;
+      showSlide(current);
+    }
+
+    function prevSlide() {
+      current = (current - 1 + slides.length) % slides.length;
+      showSlide(current);
+    }
+
+    function startSlideshow() {
+      if (!interval) {
+        interval = setInterval(nextSlide, 5000); // 5 seconds
+      }
+    }
+
+    function stopSlideshow() {
+      clearInterval(interval);
+      interval = null;
+    }
+
+    // Init first slide
+    document.addEventListener("DOMContentLoaded", () => {
+      if (slides.length > 0) showSlide(0);
+    });
+  </script>
+
+</body>
+</html>
